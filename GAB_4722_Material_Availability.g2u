@@ -1,0 +1,51 @@
+Program.Sub.Preflight.Start
+Program.Sub.Preflight.End
+
+Program.Sub.Main.Start
+	F.Intrinsic.Control.Try
+	V.Local.sError.Declare
+	
+	V.Local.iBIRunID.Declare
+	V.Local.iBILogID.Declare
+	V.local.iRet.Declare
+	V.Local.iRptID.Declare
+	V.Local.sParamNames.Declare
+	V.Local.sParamValues.Declare
+	V.Local.sMsg.Declare
+	
+	F.Intrinsic.Control.If(V.Caller.Hook,=,12010)
+		V.Passed.000141.Set("Matl Avail")
+		F.Intrinsic.Control.End
+	F.Intrinsic.Control.EndIf
+	
+	F.Global.BI.GetIDFromName("GAB_4722_Material_Availability.rpt",V.Local.iRptID)
+	F.Intrinsic.Control.If(V.Local.iRptID,<,0)
+		F.Intrinsic.UI.Msgbox("GAB_4722_Material_Availability.rpt is not setup as a custom report.","Report not setup")
+		F.Intrinsic.Control.End
+	F.Intrinsic.Control.EndIf
+	
+	F.Intrinsic.Control.If(V.Passed.000052,=,"")
+		F.Intrinsic.UI.Msgbox("Please enter a part number.","Matl Avail Report")
+		F.Intrinsic.Control.End
+	F.Intrinsic.Control.EndIf
+	
+	F.Intrinsic.Control.If(V.Passed.000007,=,"")
+		F.Intrinsic.UI.Msgbox("Please enter a quantity.","Matl Avail Report")
+		F.Intrinsic.Control.End
+	F.Intrinsic.Control.EndIf
+	
+	F.Global.BI.GetRunID(V.Local.iBIRunID)
+	F.Global.BI.StartLogging(V.Local.iBIRunID,V.Local.iRptID,0,"",V.Local.iBILogID)
+	
+	V.Local.sParamNames.Set("ASSY*!*REV*!*QTY")
+	F.Intrinsic.String.Build("{0}*!*{1}*!*{2}",V.Passed.000052,V.Passed.000053,V.Passed.000007,V.Local.sParamValues)
+	F.Global.BI.RunReportPreProcessor(V.Local.iBIRunID,V.Local.iBILogID,V.Local.sParamNames,V.Local.sParamValues,"",-1,True,"",-1,"",-1,"","",V.Local.iRet)
+	
+	F.Global.BI.StopLogging(V.Local.iBILogID)
+	
+	F.Intrinsic.Control.Catch
+		F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Local.sError)
+		F.Intrinsic.UI.Msgbox(V.Local.sError)
+		F.Intrinsic.Control.End 
+	F.Intrinsic.Control.EndTry
+Program.Sub.Main.End
